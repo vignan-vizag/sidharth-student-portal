@@ -34,16 +34,16 @@ const CategoryWiseTests: React.FC = () => {
     return <p className="mt-[15%] text-center text-red-500 text-lg h-screen">Error: {error}</p>;
 
   return (
-    <div className="max-w-6xl mx-auto p-6 min-h-screen">
+    <div className="max-w-6xl mx-auto p-6 lg:px-0 min-h-screen">
       <h1 className="text-xl font-semibold font-mono uppercase  mb-4 text-gray-800">Available Tests ({tests.length})</h1>
 
       {tests.length === 0 ? (
         <p className="text-center text-gray-600 text-lg">No tests available</p>
       ) : (
-        <div className="flex flex-wrap items-center gap-5">
+        <div className="grid grid-cols-4 xl:grid-cols-3 md:!grid-cols-1 gap-5">
           {tests.map((test) => (
             // <div key={test._id} className="bg-white border-[2px] w-72 border-neutral-200 p-4 hover:border-blue-600 transition-all duration-200">
-            <div key={test._id} className="p-4 py-6 bg-white border-[2px] h-80 w-72 ">
+            <div key={test._id} className="p-4 py-6 bg-white border-[2px] h-80 w-auto ">
               {/* <Link href={`/assessment/${test._id}`} key={test._id}> */}
 
               <div className="flex flex-col justify-between h-full">
@@ -56,7 +56,7 @@ const CategoryWiseTests: React.FC = () => {
                       {/* <div>Category</div> */}
                       <ul className="mt-1 flex flex-wrap gap-1">
                         {test.categories.map((category) => (
-                          <li key={category._id} className="px-4 py-0.5 w-fit lg:w-full text-sm border rounded-sm border-purple-700/40 bg-purple-500/20 font-mono">
+                          <li key={category._id} className="px-4 py-0.5 w-fit text-sm border rounded-sm border-purple-700/40 bg-purple-500/20 font-mono">
                             {category.categoryName}
                           </li>
                         ))}

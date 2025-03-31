@@ -15,6 +15,7 @@ const Header = () => {
             {/* <Link href={"/dashboard"}>Dashboard</Link> */}
             <Link href={"/assessment"} className='hover:text-violet-900 transition-all duration-200 hover:underline hover:underline-offset-2'>Assessments</Link>
             <Link href={"/practice"} className='hover:text-violet-900 transition-all duration-200 hover:underline hover:underline-offset-2'>Practice</Link>
+            <Link href={"/dashboard"} className='hover:text-violet-900 transition-all duration-200 hover:underline hover:underline-offset-2'>Dashboard</Link>
           </div>
         </div>
         <div>
