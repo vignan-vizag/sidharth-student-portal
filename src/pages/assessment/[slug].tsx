@@ -2,7 +2,7 @@ import { Test } from "@/types";
 import { API_BASE_URL } from "@/utils";
 import { useRouter } from "next/router";
 import React, { useState, useEffect } from "react";
-import sampleTests from "@/lib/sample-tests.json";
+// import sampleTests from "@/lib/sample-tests.json";
 
 const AssessmentSlug = () => {
   const [test, setTest] = useState<Test | null>(null);
@@ -100,7 +100,7 @@ const AssessmentSlug = () => {
           <h1 className="text-3xl font-bold text-center">Final Results</h1>
 
           <div className="grid grid-cols-2 md:grid-cols-1 gap-6 mt-6">
-            {test.categories.map((category, index) => {
+            {test.categories.map((category) => {
               const { score, percentage } = calculateCategoryStats(category.categoryName);
               return (
                 <div

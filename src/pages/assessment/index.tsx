@@ -2,10 +2,10 @@ import { API_BASE_URL } from "@/utils";
 import React, { useEffect, useState } from "react";
 import { Test } from "@/types";
 import Link from "next/link";
-import sampleTests from "@/lib/sample-tests.json";
+// import sampleTests from "@/lib/sample-tests.json";
 
 const CategoryWiseTests: React.FC = () => {
-  const [tests, setTests] = useState<Test[] | any[]>([]);
+  const [tests, setTests] = useState<Test[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -17,8 +17,8 @@ const CategoryWiseTests: React.FC = () => {
         const data: Test[] = await res.json();
         setTests(data);
       } catch (err) {
-        setTests(sampleTests);
-        // setError((err as Error).message);
+        // setTests(sampleTests);
+        setError((err as Error).message);
       } finally {
         setLoading(false);
       }
@@ -55,7 +55,7 @@ const CategoryWiseTests: React.FC = () => {
                     <div>
                       {/* <div>Category</div> */}
                       <ul className="mt-1 flex flex-wrap gap-1">
-                        {test.categories.map((category: any) => (
+                        {test.categories.map((category) => (
                           <li key={category._id} className="px-4 py-0.5 w-fit lg:w-full text-sm border rounded-sm border-purple-700/40 bg-purple-500/20 font-mono">
                             {category.categoryName}
                           </li>
