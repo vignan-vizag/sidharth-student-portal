@@ -86,26 +86,78 @@ const AssessmentSlug = () => {
     const totalCorrect = test.categories.reduce((total, category) => total + calculateCategoryStats(category.categoryName).score, 0);
     const totalQuestions = test.categories.reduce((total, category) => total + category.questions.length, 0);
     const overallPercentage = ((totalCorrect / totalQuestions) * 100).toFixed(2);
+
     return (
       <div className="min-h-screen w-full max-w-6xl mx-auto p-6 lg:px-0">
-        <div className="">
-          <h1 className="text-3xl font-semibold font-mono uppercase text-left text-neutral-800">{test.testName}</h1>
-          <h2 className="text-xl font-semibold font-mono uppercase text-left text-neutral-800">Final Results</h2>
-          <div className="grid grid-cols-2 md:grid-cols-1 gap-6 mt-6">
+        <div className="mt-8">
+          <h1 className="text-3xl font-semibold">2026-SEM1</h1>
+          <h2 className="text-xl mb-4">FINAL RESULTS</h2>
+          
+          {/* Student Details Section */}
+          <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h3 className="text-lg font-medium mb-4">Student Information</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-gray-600">Name</p>
+                <p className="font-medium">Sidharth Varma</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Roll No</p>
+                <p className="font-medium">22L31A0562</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Email</p>
+                <p className="font-medium">22l31a0562@vignaniit.edu.in</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Branch</p>
+                <p className="font-medium">CSE</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Test Status Section */}
+          <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h3 className="text-lg font-medium mb-4">Test Summary</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-gray-600">Status</p>
+                <p className="font-medium text-green-600">COMPLETED</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Submitted On</p>
+                <p className="font-medium">04/04/2025</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Category Results */}
+          <div className="space-y-6">
             {test.categories.map((category) => {
               const { score, percentage } = calculateCategoryStats(category.categoryName);
               return (
-                <div key={category.categoryName} className="p-6 border border-neutral-500 font-sans">
-                  <h3 className="text-xl font-semibold font-mono uppercase text-left text-neutral-800">{category.categoryName}</h3>
-                  <p className="text-lg">Score: {score}/{category.questions.length}</p>
-                  <p className="text-lg">Correct Score: {percentage}%</p>
+                <div key={category.categoryName} className="bg-white p-6 rounded-lg shadow-md mb-6">
+                  <h3 className="text-xl font-bold mb-3">{category.categoryName}</h3>
+                  <div className="space-y-2">
+                    <p className="text-gray-700">
+                      Score: <span className="font-medium">{score}/{category.questions.length}</span>
+                    </p>
+                    <p className="text-gray-700">
+                      Percentage: <span className="font-medium">{percentage}%</span>
+                    </p>
+                  </div>
                 </div>
               );
             })}
           </div>
-          <div className="mt-6 text-center">
-            <p className="text-2xl font-semibold text-neutral-800">Overall Score: {overallPercentage}%</p>
-            <button onClick={() => window.location.reload()} className="mt-4 px-6 py-2 bg-blue-600 text-white rounded shadow-md hover:bg-blue-700 transition-all">
+
+          {/* Overall Result */}
+          <div className="mt-8 text-center">
+            <p className="text-2xl font-bold mb-4">Overall Score: {overallPercentage}%</p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            >
               Restart Quiz
             </button>
           </div>
@@ -117,27 +169,26 @@ const AssessmentSlug = () => {
   return (
     <div className="relative min-h-screen w-full max-w-6xl mx-auto p-6 lg:px-0">
       <div className="flex gap-3 items-center justify-between mb-4">
-        <h1 className="text-xl font-semibold font-mono uppercase text-left text-neutral-800">{test.testName}</h1>
-        <div><CountdownTimer /></div>
+        <h1 className="text-xl font-semibold">{test.testName}</h1>
+        <CountdownTimer />
       </div>
       {test.categories.map((category) => (
-        <div key={category.categoryName} className="flex flex-col gap-6 lg:gap-3 font-sans">
-          <h2 className="text-xl font-semibold font-mono uppercase text-center mb-4 text-neutral-800">
-            {category.categoryName}
-          </h2>
+        <div key={category.categoryName} className="flex flex-col gap-6 lg:gap-3">
+          <h2 className="text-xl font-semibold text-center mb-4">{category.categoryName}</h2>
           {category.questions.map((question) => {
             const isSubmitted = selectedAnswers[category.categoryName]?.[question._id]?.submitted || false;
             const selectedOption = selectedAnswers[category.categoryName]?.[question._id]?.answer;
-
             return (
               <div key={question._id} className="p-5 mb-10 lg:mb-8 py-7 bg-white border-l-4 shadow-md border-blue-500">
-                <h3 className="text-base font-semibold text-neutral-800">{question.question}</h3>
-                <ul className="mt-3 space-y-3 text-sm font-[540]">
+                <h3 className="text-base font-semibold">{question.question}</h3>
+                <ul className="mt-3 space-y-3 text-sm">
                   {question.options.map((option, index) => (
                     <li key={index}>
-                      <label className={`flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-blue-200 transition-all
-                            ${selectedOption === option ? "bg-blue-200 text-blue-500 border-blue-500" : "bg-neutral-100 text-neutral-700"}
-                        `}>
+                      <label 
+                        className={`flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-blue-200 transition-all
+                          ${selectedOption === option ? "bg-blue-200 text-blue-500 border-blue-500" : "bg-gray-100 text-gray-700"}
+                        `}
+                      >
                         <input
                           type="radio"
                           name={`question-${question._id}`}
@@ -147,7 +198,7 @@ const AssessmentSlug = () => {
                           disabled={isSubmitted}
                           className="form-radio text-blue-600"
                         />
-                        <span className="">{option}</span>
+                        <span>{option}</span>
                       </label>
                     </li>
                   ))}
@@ -163,14 +214,17 @@ const AssessmentSlug = () => {
             );
           })}
         </div>
-
       ))}
       <div className="flex justify-center mb-6">
-        <button onClick={handleSubmit} className="px-6 py-2 font-sans text-sm tracking-wider font-medium uppercase rounded border bg-green-600 text-white hover:bg-green-700 transition-all">
+        <button 
+          onClick={handleSubmit} 
+          className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all"
+        >
           Submit
         </button>
       </div>
     </div>
   );
 };
+
 export default AssessmentSlug;
