@@ -1,7 +1,8 @@
+import Link from "next/link";
+import { Test } from "@/types";
 import { API_BASE_URL } from "@/utils";
 import React, { useEffect, useState } from "react";
-import { Test } from "@/types";
-import Link from "next/link";
+import Head from "next/head";
 // import sampleTests from "@/lib/sample-tests.json";
 
 const CategoryWiseTests: React.FC = () => {
@@ -25,7 +26,7 @@ const CategoryWiseTests: React.FC = () => {
     };
 
     fetchTests();
-  }, []);  
+  }, []);
 
   if (loading)
     return <p className="mt-[15%] text-center text-gray-500 text-lg h-screen">Loading tests...</p>;
@@ -35,6 +36,7 @@ const CategoryWiseTests: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto p-6 lg:px-0 min-h-screen">
+      <Head><title>Assessments | Assessment Student Portal</title></Head>
       <h1 className="text-xl font-semibold font-mono uppercase  mb-4 text-gray-800">Available Tests ({tests.length})</h1>
 
       {tests.length === 0 ? (

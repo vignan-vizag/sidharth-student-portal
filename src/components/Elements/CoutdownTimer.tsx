@@ -1,31 +1,43 @@
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface CountdownTimerProps {
+    slug: string;
     duration?: number;
     onComplete?: () => void;
+    isRunning: boolean;
 }
 
-const CountdownTimer = ({ duration = 3 * 60 * 60, onComplete }: CountdownTimerProps) => {
+const CountdownTimer = ({ slug, duration = 3 * 60 * 60, onComplete, isRunning }: CountdownTimerProps) => {
+    const timerKey = `timer-${slug}`;
     const [timeLeft, setTimeLeft] = useState<number>(() => {
-        const savedTime = localStorage.getItem("timer");
-        return savedTime ? Math.max(0, parseInt(savedTime, 10)) : duration;
+        const saved = localStorage.getItem(timerKey);
+        return saved ? Math.max(0, parseInt(saved, 10)) : duration;
     });
 
+    const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
     useEffect(() => {
-        if (timeLeft <= 0) {
-            onComplete?.();
-            localStorage.removeItem("timer");
-            return;
+        if (isRunning && timeLeft > 0) {
+            intervalRef.current = setInterval(() => {
+                setTimeLeft((prev) => {
+                    const newTime = Math.max(0, prev - 1);
+                    localStorage.setItem(timerKey, newTime.toString());
+                    return newTime;
+                });
+            }, 1000);
         }
 
-        localStorage.setItem("timer", timeLeft.toString());
+        return () => {
+            if (intervalRef.current) clearInterval(intervalRef.current);
+        };
+    }, [isRunning]);
 
-        const timer = setInterval(() => {
-            setTimeLeft((prev) => Math.max(0, prev - 1));
-        }, 1000);
-
-        return () => clearInterval(timer);
-    }, [timeLeft, onComplete]);
+    useEffect(() => {
+        if (timeLeft <= 0 && isRunning) {
+            onComplete?.();
+            localStorage.removeItem(timerKey);
+        }
+    }, [timeLeft, isRunning, onComplete]);
 
     const formatTime = (seconds: number): string => {
         const hours = Math.floor(seconds / 3600);
@@ -34,7 +46,11 @@ const CountdownTimer = ({ duration = 3 * 60 * 60, onComplete }: CountdownTimerPr
         return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
     };
 
-    return <div className="text-lg font-bold text-red-600 border px-3 py-px border-red-500 font-mono">{formatTime(timeLeft)}</div>;
+    return (
+        <div className="text-lg font-bold text-red-600 border px-3 py-px border-red-500 font-mono">
+            {formatTime(timeLeft)}
+        </div>
+    );
 };
 
 export default CountdownTimer;
