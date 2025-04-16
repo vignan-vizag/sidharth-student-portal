@@ -1,4 +1,4 @@
-import { Test } from "@/types";
+import { Student, Test } from "@/types";
 import { API_BASE_URL } from "@/utils";
 import { useRouter } from "next/router";
 import { useState, useEffect, ChangeEvent } from "react";
@@ -14,10 +14,12 @@ export const useAssessment = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [studentId, setStudentId] = useState<string | null>(null);
+    const [studentInfo, setStudentInfo] = useState<Student | null>(null);
     const [studentYear, setStudentYear] = useState<number | null>(null);
     const [selectedAnswers, setSelectedAnswers] = useState<Record<string, Record<string, { answer: string; submitted: boolean }>>>({});
     const [completedCategories, setCompletedCategories] = useState<string[]>([]);
     const [isRunning, setIsRunning] = useState<boolean>(false);
+    const [testCompleted, setTestCompleted] = useState<boolean | null>(false);
     const [studentData, setStudentData] = useState<StudentData>({
         rollNo: '',
         name: '',
@@ -35,28 +37,47 @@ export const useAssessment = () => {
         // console.log(parsedStudent._id);
         setStudentId(parsedStudent._id);
         setStudentYear(parsedStudent.year);
-        
+
         if (!student || !studentData) {
             router.push("/login");
         }
     }, []);
-    
+
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setStudentData((prev) => ({ ...prev, [name]: value }));
     };
 
-    const startTest = () => {
-        // const { rollNo, name, email } = studentData;
-
-        // if (!rollNo || !name || !email) {
-        //     alert('Please fill in all fields.');
-        //     return;
-        // }
-
+    const startTest = async () => {
+        if (!test) return;
         setIsRunning(true);
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/tests/${test._id}/start`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    studentId: studentId,
+                    testId: test._id,
+                    year: studentYear,
+                }),
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                setIsRunning(true);
+                setTestCompleted(false)
+            } else {
+                setTestCompleted(true)
+                // alert(`Failed to start the test: ${data.message}`);
+            }
+        } catch (err) {
+            alert("An error occurred while starting the test. Please try again.");
+        }
     };
+
 
     const endTest = () => {
         setIsRunning(false);
@@ -79,6 +100,43 @@ export const useAssessment = () => {
         };
         fetchTest();
     }, [testId]);
+
+    useEffect(() => {
+        if (!studentId) return;
+
+        const fetchStudent = async () => {
+            try {
+                const res = await fetch(`${API_BASE_URL}/students/${studentId}?year=${studentYear}`);
+                if (!res.ok) throw new Error("Failed to fetch student details");
+                const data = await res.json();
+
+                setStudentInfo(data);
+
+            } catch (err) {
+                setError((err as Error).message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchStudent();
+    }, [studentId, studentYear]);
+
+    useEffect(() => {
+        if (!studentInfo?.assignedTests || !testId) return;
+
+        const currentTest = studentInfo.assignedTests.find(test => test.testId === testId);
+
+        if (currentTest?.status === "completed") {
+            setIsRunning(false);
+            setTestCompleted(true);
+        }
+
+        if (currentTest?.status === "in-progress") {
+            setIsRunning(true);
+            setTestCompleted(false);
+        }
+    }, [studentInfo, testId]);
 
     const handleAnswerSelect = (categoryName: string, qId: string, option: string) => {
         setSelectedAnswers((prev) => ({
@@ -109,7 +167,7 @@ export const useAssessment = () => {
     const handleSubmit = async () => {
         if (!test) return;
         // console.log(studentData);
-        
+
 
         const completed = test.categories
             .filter(category =>
@@ -153,7 +211,7 @@ export const useAssessment = () => {
                 const data = await res.json();
 
                 console.log(data);
-                
+
                 if (res.ok) {
                     console.log("Test marks submitted:", data);
                     endTest();
@@ -166,12 +224,47 @@ export const useAssessment = () => {
                 alert("Error submitting test. Please try again.");
             }
         }
-
+        setTestCompleted(true)
+        setIsRunning(false)
         // scroll to top
         window.scrollTo(0, 0);
     };
 
+    // const isTestCompleted = async () => {
+    //     const testId = test?._id;
+    //     try {
+    //         const res = await fetch(`${API_BASE_URL}/students`);
+    //         const students: Student[] = await res.json();
 
+    //         // Find the student by studentId
+    //         const student = students.find((student) => student._id === studentId);
+
+    //         if (student) {
+    //             // Check if the specific test is completed
+    //             const isCompleted = student.assignedTests.some((test) => test.testId === testId && test.status === "completed");
+    //             return isCompleted;
+    //         } else {
+    //             // If the student is not found, return false or handle accordingly
+    //             return false;
+    //         }
+    //     } catch (error) {
+    //         console.error("Error fetching student data:", error);
+    //         return false;
+    //     }
+    // }
+
+    // useEffect(() => {
+    //     const checkTestCompletion = async () => {
+    //         const completed = await isTestCompleted();
+    //         setTestCompleted(completed);
+    //     };
+
+    //     checkTestCompletion();
+    // }, [testId, studentId]);
+
+    // if (testCompleted === null) {
+    //     return <div>Loading...</div>;
+    // }
 
     const calculateCategoryStats = (categoryName: string) => {
         const category = test?.categories.find(cat => cat.categoryName === categoryName);
@@ -191,6 +284,8 @@ export const useAssessment = () => {
         loading,
         error,
         selectedAnswers,
+        testCompleted,
+        studentInfo,
         completedCategories,
         isRunning,
         studentData,

@@ -2,6 +2,7 @@ import { useRouter } from "next/router";
 import React, { useState } from "react";
 import { useAuth } from "@/components/Hooks/useAuth";
 import Head from "next/head";
+import { useNotification } from "@/components/context/NotificationContext";
 
 interface LoginFormData {
   rollno: string;
@@ -15,6 +16,8 @@ const Login: React.FC = () => {
     year: "",
     password: "",
   });
+
+  const { showNotification } = useNotification();
 
   const { login } = useAuth();
   const router = useRouter();
@@ -47,24 +50,26 @@ const Login: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+  
     const { rollno, year, password } = formData;
-
+  
     if (!rollno || !year || !password) {
-      alert("All fields are required!");
+      showNotification("All fields are required!", "error");
       return;
     }
-
+  
     const normalizedRollno = rollno.toUpperCase();
-
-    try {
-      await login({ ...formData, rollno: normalizedRollno });
-      router.push("/dashboard");
-    } catch (error) {
-      console.error("Login failed:", error);
-      alert("Login failed, please try again.");
+  
+    const { error } = await login({ ...formData, rollno: normalizedRollno });
+  
+    if (error) {
+      showNotification(error, "error");
+      return;
     }
+  
+    router.push("/dashboard");
   };
+  
 
   return (
     <div className="w-full max-w-6xl mx-auto p-6">

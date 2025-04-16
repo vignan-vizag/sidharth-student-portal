@@ -16,6 +16,11 @@ const CountdownTimer = ({ slug, duration = 3 * 60 * 60, onComplete, isRunning }:
 
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
+    const handleOnClick = () => {
+        onComplete?.();
+        localStorage.removeItem(timerKey);
+    }
+
     useEffect(() => {
         if (isRunning && timeLeft > 0) {
             intervalRef.current = setInterval(() => {
@@ -47,7 +52,7 @@ const CountdownTimer = ({ slug, duration = 3 * 60 * 60, onComplete, isRunning }:
     };
 
     return (
-        <div className="text-lg font-bold text-red-600 border px-3 py-px border-red-500 font-mono">
+        <div className="text-lg font-bold text-red-600 border px-3 py-px border-red-500 font-mono cursor-pointer" onClick={handleOnClick}>
             {formatTime(timeLeft)}
         </div>
     );

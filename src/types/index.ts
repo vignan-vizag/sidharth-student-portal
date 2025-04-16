@@ -25,7 +25,19 @@ export interface Test {
 interface AssignedTestPending {
     _id: string;
     testId: string;
+    marks: Record<string, number>;
     status: 'pending';
+    start: string | null;
+    submittedAt: string | null;
+}
+
+interface AssignedTestInProgress {
+    _id: string;
+    testId: string;
+    start: string | null;
+    status: 'in-progress';
+    marks: Record<string, number>;
+    submittedAt: string | null;
 }
 
 interface AssignedTestCompleted {
@@ -33,10 +45,11 @@ interface AssignedTestCompleted {
     testId: string;
     status: 'completed';
     marks: Record<string, number>;
+    start: string | null;
     submittedAt: string | null;
 }
 
-type AssignedTest = AssignedTestPending | AssignedTestCompleted;
+type AssignedTest = AssignedTestPending | AssignedTestInProgress | AssignedTestCompleted;
 
 export interface Student {
     _id: string;

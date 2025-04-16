@@ -4,9 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useAssessment } from "@/components/Hooks/useAssessment";
 import CountdownTimer from "@/components/Elements/CoutdownTimer";
 import Head from "next/head";
-// import { Test } from "@/types";
-// import { API_BASE_URL } from "@/utils";
-// import { useRouter } from "next/router";
+import RankCard from "@/components/Elements/RankCard";
 
 const AssessmentSlug = () => {
   const {
@@ -15,7 +13,9 @@ const AssessmentSlug = () => {
     test,
     isRunning,
     selectedAnswers,
+    testCompleted,
     studentData,
+    studentInfo,
     handleChange,
     startTest,
     handleAnswerSelect,
@@ -38,7 +38,7 @@ const AssessmentSlug = () => {
 
   const Header = ({ testName }: { testName: string; }) => {
     return (
-      <div className="sticky top-0 bg-white">
+      <div className="sticky top-0 bg-white w-full">
         <div className="flex items-center justify-between px-10 py-5 lg:px-0">
           <div>
             <div className="flex gap-4 items-center">
@@ -73,10 +73,21 @@ const AssessmentSlug = () => {
   if (!student) return <p>Loading student data...</p>;
   if (!test) return <div className="text-center mt-5 h-screen">Test not found</div>;
 
-  if (completedCategories.length === test.categories.length) {
-    const totalCorrect = test.categories.reduce((total, category) => total + calculateCategoryStats(category.categoryName).score, 0);
+  if (testCompleted && !isRunning) {
+    const totalCorrect = test.categories.reduce((total, category) => {
+      const categoryScore = calculateCategoryStats(category.categoryName).score;
+      const assignedTestMarks = studentInfo?.assignedTests.find(
+        (assignedTest) => assignedTest.testId === test._id
+      )?.marks[category.categoryName] || 0;
+      console.log(test._id);
+      console.log(assignedTestMarks);
+      console.log(studentInfo?.assignedTests);
+
+      return total + categoryScore + assignedTestMarks;
+    }, 0) || 0;
+
     const totalQuestions = test.categories.reduce((total, category) => total + category.questions.length, 0);
-    // const overallPercentage = ((totalCorrect / totalQuestions) * 100).toFixed(2);
+
     const overallPercentage = Math.round((totalCorrect / totalQuestions) * 100);
 
     return (
@@ -90,36 +101,28 @@ const AssessmentSlug = () => {
             <div>
               <div className="text-3xl font-sans font-medium">Your grade: <span className={`font-semibold font-mono tracking-wide ${overallPercentage >= 80 ? "text-green-600" : "text-red-600"}`}>{overallPercentage}%</span></div>
             </div>
-            <div>
+            {/* <div>
               <button onClick={() => window.location.reload()} className="px-6 py-2 bg-blue-600 text-white shadow-md hover:bg-blue-700 transition-all">
                 Retry Assessment
               </button>
-            </div>
+            </div> */}
           </div>
         </div>
         <div className="min-h-screen w-full max-w-6xl mx-auto p-6 lg:p-0">
           <div className="">
 
-            {/* <h1 className="text-3xl font-semibold font-mono uppercase text-left text-neutral-800">{test.testName}</h1>
-              <h2 className="text-xl font-semibold font-mono uppercase text-left text-neutral-800">Final Results</h2> */}
-            <div className="grid grid-cols-2 md:grid-cols-1 gap-6">
-              {test.categories.map((category) => {
-                const { score, percentage } = calculateCategoryStats(category.categoryName);
-                console.log(score);
-                console.log(percentage);
-                return (
-                  <div key={category.categoryName} className="p-6 border border-neutral-500 font-sans">
-                    <h3 className="text-xl font-semibold font-mono uppercase text-left text-neutral-800">{category.categoryName}</h3>
-                    <p className="text-lg">Score: {score}/{category.questions.length}</p>
-                    <p className="text-lg">Correct Score: {percentage}%</p>
-                  </div>
-                );
-              })}
+            <h1 className="text-3xl font-semibold font-mono uppercase text-left text-neutral-800">{test.testName}</h1>
+            <h2 className="text-xl font-semibold font-mono uppercase text-left text-neutral-800">Final Results</h2>
+
+
+            <div className="mt-6">
+              <RankCard studentId={student._id} test={test} /> {/* Insert your rank data prop here */}
             </div>
+
             <div className="mt-6 space-y-10 font-sans">
               {test.categories.map((category) => (
                 <div key={category.categoryName}>
-                  <h2 className="text-xl font-semibold font-mono uppercase text-left text-neutral-800 mb-2">{category.categoryName} - Review</h2>
+                  <h2 className="text-3xl font-semibold font-mono uppercase text-left text-neutral-800 mb-2">{category.categoryName} - Review</h2>
                   {category.questions.map((question) => {
                     const selected = selectedAnswers[category.categoryName]?.[question._id]?.answer;
                     const isCorrect = selected === question.correctAnswer;
@@ -204,7 +207,7 @@ const AssessmentSlug = () => {
   }
 
   return (
-    <div className="relative">
+    <div className="relative overflow-hidden">
       <Head>
         <title>{`${test.testName}`}</title>
       </Head>

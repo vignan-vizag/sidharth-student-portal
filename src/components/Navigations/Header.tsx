@@ -31,7 +31,7 @@ const Header = () => {
   }, []);
 
   return (
-    <div className="h-24 lg:h-14 bg-white -mx-3 lg:m-0 flex justify-center">
+    <div className="h-24 lg:h-14 bg-white -mx-3 lg:m-0 flex justify-center w-full">
       <div className="py-3 max-w-6xl w-full flex items-center justify-between">
         <div className="hidden lg:flex items-center gap-1.5">
           <Image src={VIGNAN} width={42} height={42} alt="Vignan Logo" />

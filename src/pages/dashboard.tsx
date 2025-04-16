@@ -176,21 +176,23 @@ const Dashboard = () => {
                     </div>
                   </div>
                   <div className="w-full flex flex-col">
-                    <div className={`my-2 py-1 px-3 text-center border font-mono font-bold
+                    <div className={`my-2 py-1 px-3 text-center border font-mono font-bold capitalize
                       ${assignedTest?.status === 'completed' ? "border-green-600 bg-green-500/50 text-green-800" : "border-orange-600 bg-orange-500/50"}
                     `}>
                       {assignedTest?.status === 'completed' ? (
                         `${obtainedMarks}/${totalMarks} (${percentage.toFixed(2)}%)`
                       ) : (
-                        'Pending'
+                        assignedTest?.status
                       )}
                     </div>
 
                     <Link
                       href={`/assessment/${test._id}`}
-                      className="p-2 w-full px-4 border border-blue-600 hover:border-blue-700 bg-blue-500/30 text-blue-800 hover:text-blue-900 hover:bg-blue-500/40 transition-all duration-100 text-sm text-center font-medium tracking-wide"
+                      className={`p-2 w-full px-4 border transition-all duration-100 text-sm text-center font-medium tracking-wide
+                      ${assignedTest?.status === 'completed' ? "border-yellow-600 hover:border-yellow-700 bg-yellow-500/30 text-yellow-800 hover:text-yellow-900 hover:bg-yellow-500/40" : "border-blue-600 hover:border-blue-700 bg-blue-500/30 text-blue-800 hover:text-blue-900 hover:bg-blue-500/40" }
+                        `}
                     >
-                      Take Assessment
+                      {assignedTest?.status === 'completed' ? `View Report` : `Take Assessment`}
                     </Link>
                   </div>
                 </div>

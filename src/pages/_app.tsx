@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Header from "@/components/Navigations/Header";
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
+import { NotificationProvider } from "@/components/context/NotificationContext";
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
@@ -14,9 +15,11 @@ export default function App({ Component, pageProps }: AppProps) {
   }, [router.asPath]);
 
   return (
-    <div className="px-3">
-      {showHeader && <Header />}
-      <Component {...pageProps} />
+    <div>
+        {showHeader && <Header />}
+        <NotificationProvider>
+          <Component {...pageProps} />
+        </NotificationProvider>
     </div>
   );
 }
