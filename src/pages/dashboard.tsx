@@ -4,6 +4,7 @@ import Link from "next/link";
 import { API_BASE_URL } from "@/utils";
 import { Test, Student } from "@/types";
 import Head from "next/head";
+import { generateReportPDF } from "@/utils/pdfGenerator";
 
 const Dashboard = () => {
   const router = useRouter();
@@ -90,6 +91,35 @@ const Dashboard = () => {
     localStorage.removeItem("student");
     window.dispatchEvent(new Event("authChange"));
     router.push("/login");
+  };
+
+  const handleDownloadReport = async (test: Test, assignedTest: any) => {
+    if (!student || assignedTest?.status !== 'completed') return;
+
+    let totalMarks = 0;
+    let obtainedMarks = 0;
+
+    test.categories.forEach((category) => {
+      const categoryMarks = assignedTest.marks[category.categoryName] || 0;
+      obtainedMarks += categoryMarks;
+      totalMarks += category.questions.length;
+    });
+
+    const percentage = totalMarks > 0 ? (obtainedMarks / totalMarks) * 100 : 0;
+
+    try {
+      await generateReportPDF({
+        student,
+        test,
+        assignedTest,
+        obtainedMarks,
+        totalMarks,
+        percentage
+      });
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Failed to generate PDF report. Please try again.');
+    }
   };
 
   if (!student) return null;
@@ -194,6 +224,15 @@ const Dashboard = () => {
                     >
                       {assignedTest?.status === 'completed' ? `View Report` : `Take Assessment`}
                     </Link>
+
+                    {assignedTest?.status === 'completed' && (
+                      <button
+                        onClick={() => handleDownloadReport(test, assignedTest)}
+                        className="mt-2 p-2 w-full px-4 border transition-all duration-100 text-sm text-center font-medium tracking-wide border-green-600 hover:border-green-700 bg-green-500/30 text-green-800 hover:text-green-900 hover:bg-green-500/40"
+                      >
+                        Download Report
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

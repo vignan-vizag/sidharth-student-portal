@@ -81,7 +81,7 @@ const Login: React.FC = () => {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           {renderInput("Reg No", "text", "rollno", "Enter registration number")}
-          {renderInput("Year", "number", "year", "Enter year")}
+          {renderInput("Graduating Year", "number", "year", "Enter year")}
           {renderInput("Password", "password", "password", "Enter password")}
 
           <div className="mt-4">

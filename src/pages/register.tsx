@@ -25,9 +25,10 @@ const branches = [
     "ECM",
     "MECH",
     "CIVIL",
+    "IT",
 ] as const;
 
-const sections = ["A", "B", "C", "D"] as const;
+const sections = ["1", "2", "3", "4" , "5" , "6" , "7" , "8"] as const;
 const currentYear = new Date().getFullYear();
 const years = Array.from({ length: 9 }, (_, i) => currentYear + 4 - i);
 const semesters = [1, 2, 3, 4, 5, 6, 7, 8] as const;
@@ -152,7 +153,7 @@ const StudentForm: React.FC = () => {
                     </div>
 
                     <div className="w-full">
-                        <label className="block font-medium">Year</label>
+                        <label className="block font-medium">Graduating Year</label>
                         <select
                             name="year"
                             value={formData.year}
