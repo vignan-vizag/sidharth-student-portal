@@ -51,6 +51,16 @@ export const useAssessment = () => {
 
     const startTest = async () => {
         if (!test) return;
+
+        // Check if the test is already completed
+        const currentTest = studentInfo?.assignedTests.find(test => test.testId === testId);
+        if (currentTest?.status === "completed") {
+            // Don't use alert, return early to prevent starting
+            setIsRunning(false);
+            setTestCompleted(true);
+            return;
+        }
+
         setIsRunning(true);
 
         try {

@@ -226,12 +226,17 @@ const Dashboard = () => {
                     </Link>
 
                     {assignedTest?.status === 'completed' && (
-                      <button
-                        onClick={() => handleDownloadReport(test, assignedTest)}
-                        className="mt-2 p-2 w-full px-4 border transition-all duration-100 text-sm text-center font-medium tracking-wide border-green-600 hover:border-green-700 bg-green-500/30 text-green-800 hover:text-green-900 hover:bg-green-500/40"
-                      >
-                        Download Report
-                      </button>
+                      <>
+                        <button
+                          onClick={() => handleDownloadReport(test, assignedTest)}
+                          className="mt-2 p-2 w-full px-4 border transition-all duration-100 text-sm text-center font-medium tracking-wide border-green-600 hover:border-green-700 bg-green-500/30 text-green-800 hover:text-green-900 hover:bg-green-500/40"
+                        >
+                          Download Report
+                        </button>
+                        <div className="mt-2 text-xs text-center text-gray-500 bg-gray-100 py-1 rounded">
+                          🔒 Re-attempts not allowed
+                        </div>
+                      </>
                     )}
                   </div>
                 </div>

@@ -5,6 +5,7 @@ import { useAssessment } from "@/components/Hooks/useAssessment";
 import CountdownTimer from "@/components/Elements/CoutdownTimer";
 import Head from "next/head";
 import RankCard from "@/components/Elements/RankCard";
+import TestStartConfirmation from "@/components/Elements/TestStartConfirmation";
 
 const AssessmentSlug = () => {
   const {
@@ -28,6 +29,7 @@ const AssessmentSlug = () => {
   } = useAssessment();
 
   const [student, setStudent] = useState<Student | null>(null);
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem("student");
@@ -35,6 +37,19 @@ const AssessmentSlug = () => {
       setStudent(JSON.parse(stored));
     }
   }, []);
+
+  const handleStartTestClick = () => {
+    setShowConfirmation(true);
+  };
+
+  const handleConfirmStart = () => {
+    setShowConfirmation(false);
+    startTest();
+  };
+
+  const handleCancelStart = () => {
+    setShowConfirmation(false);
+  };
 
   const Header = ({ testName }: { testName: string; }) => {
     return (
@@ -72,6 +87,46 @@ const AssessmentSlug = () => {
   if (error) return <div className="text-center text-red-500 mt-5 h-screen">{error}</div>;
   if (!student) return <p>Loading student data...</p>;
   if (!test) return <div className="text-center mt-5 h-screen">Test not found</div>;
+
+  // Check if student has already completed this test
+  const currentAssignedTest = studentInfo?.assignedTests.find(
+    (assignedTest) => assignedTest.testId === test._id
+  );
+
+  // If test is completed, show a message and redirect option
+  if (currentAssignedTest?.status === 'completed' && !testCompleted) {
+    return (
+      <div className="max-w-4xl mx-auto p-6 mt-20">
+        <Head>
+          <title>{`${test.testName} - Already Completed`}</title>
+        </Head>
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-8 text-center">
+          <div className="text-6xl mb-4">⚠️</div>
+          <h1 className="text-2xl font-semibold text-gray-800 mb-4">
+            Test Already Completed
+          </h1>
+          <p className="text-gray-600 mb-6">
+            You have already completed the "{test.testName}" assessment. 
+            Re-attempts are not allowed.
+          </p>
+          <div className="space-y-3">
+            <Link
+              href={`/assessment/${test._id}`}
+              className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors mr-4"
+            >
+              View Your Results
+            </Link>
+            <Link
+              href="/dashboard"
+              className="inline-block px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+            >
+              Back to Dashboard
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (testCompleted && !isRunning) {
     const totalCorrect = test.categories.reduce((total, category) => {
@@ -164,6 +219,39 @@ const AssessmentSlug = () => {
   }
 
   if (!isRunning) {
+    // Check if test is already completed before showing start form
+    const currentAssignedTest = studentInfo?.assignedTests.find(
+      (assignedTest) => assignedTest.testId === test._id
+    );
+
+    if (currentAssignedTest?.status === 'completed') {
+      return (
+        <div>
+          <Head>
+            <title>{`${test.testName} - Already Completed`}</title>
+          </Head>
+          <Header testName={test.testName} />
+          <div className="flex flex-col items-center justify-center mt-10 space-y-6 max-w-md mx-auto">
+            <div className="text-6xl mb-4">⚠️</div>
+            <h2 className="text-xl font-semibold text-gray-800 text-center">
+              Test Already Completed
+            </h2>
+            <p className="text-gray-600 text-center">
+              You have already completed this assessment. Re-attempts are not allowed.
+            </p>
+            <div className="space-x-4">
+              <Link
+                href="/dashboard"
+                className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Back to Dashboard
+              </Link>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div>
         <Head>
@@ -171,6 +259,12 @@ const AssessmentSlug = () => {
         </Head>
         <Header testName={test.testName} />
         <div className="flex flex-col items-center justify-center mt-10 space-y-4">
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4 max-w-md text-center">
+            <p className="text-yellow-800 text-sm">
+              ⚠️ <strong>Important:</strong> Once you start this test, you cannot retake it. Make sure you're ready before proceeding.
+            </p>
+          </div>
+          
           <input
             type="text"
             name="rollNo"
@@ -196,12 +290,19 @@ const AssessmentSlug = () => {
             className="border px-3 py-2 rounded w-64"
           />
           <button
-            onClick={startTest}
-            className="bg-blue-600 text-white px-4 py-2 rounded"
+            onClick={handleStartTestClick}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
           >
-            Start Test
+            Start Test (No Retakes Allowed)
           </button>
         </div>
+        
+        <TestStartConfirmation
+          testName={test.testName}
+          isOpen={showConfirmation}
+          onConfirm={handleConfirmStart}
+          onCancel={handleCancelStart}
+        />
       </div>
     );
   }

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Test } from "@/types";
+import { Test, Student } from "@/types";
 import { API_BASE_URL } from "@/utils";
 import React, { useEffect, useState } from "react";
 import Head from "next/head";
@@ -7,8 +7,17 @@ import Head from "next/head";
 
 const CategoryWiseTests: React.FC = () => {
   const [tests, setTests] = useState<Test[]>([]);
+  const [student, setStudent] = useState<Student | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Get student data from localStorage
+    const studentData = localStorage.getItem("student");
+    if (studentData) {
+      setStudent(JSON.parse(studentData));
+    }
+  }, []);
 
   useEffect(() => {
     const fetchTests = async () => {
@@ -28,6 +37,11 @@ const CategoryWiseTests: React.FC = () => {
     fetchTests();
   }, []);
 
+  const getTestStatus = (testId: string) => {
+    if (!student) return null;
+    return student.assignedTests.find(test => test.testId === testId);
+  };
+
   if (loading)
     return <p className="mt-[15%] text-center text-gray-500 text-lg h-screen">Loading tests...</p>;
 
@@ -43,48 +57,74 @@ const CategoryWiseTests: React.FC = () => {
         <p className="text-center text-gray-600 text-lg">No tests available</p>
       ) : (
         <div className="grid grid-cols-4 xl:grid-cols-3 md:!grid-cols-1 gap-5">
-          {tests.map((test) => (
-            // <div key={test._id} className="bg-white border-[2px] w-72 border-neutral-200 p-4 hover:border-blue-600 transition-all duration-200">
-            <div key={test._id} className="p-4 py-6 bg-white border-[2px] h-80 w-auto ">
-              {/* <Link href={`/assessment/${test._id}`} key={test._id}> */}
+          {tests.map((test) => {
+            const testStatus = getTestStatus(test._id);
+            const isCompleted = testStatus?.status === 'completed';
+            const isAssigned = testStatus !== undefined;
 
-              <div className="flex flex-col justify-between h-full">
-                <div className="space-y-2">
-                  <h2 className="text-base text-gray-900 font-mono font-semibold">{test.testName}</h2>
-                  <div className="text-sm flex flex-col gap-0.5">
-                    <div>Public</div>
-                    <div>Active: <span></span>2 Days</div>
-                    <div>
-                      {/* <div>Category</div> */}
-                      <ul className="mt-1 flex flex-wrap gap-1">
-                        {test.categories.map((category) => (
-                          <li key={category._id} className="px-4 py-0.5 w-fit text-sm border rounded-sm border-purple-700/40 bg-purple-500/20 font-mono">
-                            {category.categoryName}
-                          </li>
-                        ))}
-                      </ul>
+            return (
+              <div key={test._id} className="p-4 py-6 bg-white border-[2px] h-80 w-auto">
+                <div className="flex flex-col justify-between h-full">
+                  <div className="space-y-2">
+                    <h2 className="text-base text-gray-900 font-mono font-semibold">{test.testName}</h2>
+                    <div className="text-sm flex flex-col gap-0.5">
+                      <div>Public</div>
+                      <div>Active: <span></span>2 Days</div>
+                      <div>
+                        <ul className="mt-1 flex flex-wrap gap-1">
+                          {test.categories.map((category) => (
+                            <li key={category._id} className="px-4 py-0.5 w-fit text-sm border rounded-sm border-purple-700/40 bg-purple-500/20 font-mono">
+                              {category.categoryName}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     </div>
+                    
+                    {/* Status indicator */}
+                    {student && (
+                      <div className="mt-2">
+                        {isCompleted ? (
+                          <span className="inline-block px-3 py-1 text-xs bg-green-100 text-green-800 border border-green-300 rounded">
+                            ✓ Completed
+                          </span>
+                        ) : isAssigned ? (
+                          <span className="inline-block px-3 py-1 text-xs bg-orange-100 text-orange-800 border border-orange-300 rounded">
+                            ⏳ Assigned
+                          </span>
+                        ) : (
+                          <span className="inline-block px-3 py-1 text-xs bg-gray-100 text-gray-800 border border-gray-300 rounded">
+                            📋 Available
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
-                </div>
 
-                <Link href={`/assessment/${test._id}`} className="p-2 px-4 border border-blue-600 hover:border-blue-700 bg-blue-500/30 text-blue-800 hover:text-blue-900 hover:bg-blue-500/40 transition-all duration-100 text-sm text-center font-medium tracking-wide">Take Assessment</Link>
-              </div>
-
-              {/* <ul className="mt-4 flex items-center gap-3 flex-wrap">
-                  {test.categories.map((category) => (
-                    <li key={category._id} className="p-3 w-fit lg:w-full border rounded-lg bg-gray-50 hover:bg-gray-100 transition">
-                      <Link
-                        href={`/assessment/${test._id}/?category=${category.categoryName.toLowerCase()}`}
-                        className="text-blue-600 font-medium hover:underline"
+                  {isCompleted ? (
+                    <div className="space-y-2">
+                      <Link 
+                        href={`/assessment/${test._id}`} 
+                        className="block p-2 px-4 border border-green-600 hover:border-green-700 bg-green-500/30 text-green-800 hover:text-green-900 hover:bg-green-500/40 transition-all duration-100 text-sm text-center font-medium tracking-wide"
                       >
-                        {category.categoryName} Assessment
+                        View Results
                       </Link>
-                    </li>
-                  ))}
-                </ul> */}
-              {/* </Link> */}
-            </div>
-          ))}
+                      <div className="text-xs text-center text-gray-500">
+                        Re-attempts not allowed
+                      </div>
+                    </div>
+                  ) : (
+                    <Link 
+                      href={`/assessment/${test._id}`} 
+                      className="p-2 px-4 border border-blue-600 hover:border-blue-700 bg-blue-500/30 text-blue-800 hover:text-blue-900 hover:bg-blue-500/40 transition-all duration-100 text-sm text-center font-medium tracking-wide"
+                    >
+                      Take Assessment
+                    </Link>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
