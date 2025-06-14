@@ -31,14 +31,22 @@ export const useAssessment = () => {
     const testId = query.slug as string;
 
     useEffect(() => {
-        const student = localStorage.getItem("student") || "";
-        // const studentData = localStorage.getItem("student");
-        const parsedStudent = JSON.parse(student);
-        // console.log(parsedStudent._id);
-        setStudentId(parsedStudent._id);
-        setStudentYear(parsedStudent.year);
+        const student = localStorage.getItem("student");
+        
+        if (!student) {
+            router.push("/login");
+            return;
+        }
 
-        if (!student || !studentData) {
+        try {
+            const parsedStudent = JSON.parse(student);
+            // console.log(parsedStudent._id);
+            setStudentId(parsedStudent._id);
+            setStudentYear(parsedStudent.year);
+        } catch (error) {
+            console.error("Error parsing student data:", error);
+            // Clear invalid data and redirect to login
+            localStorage.removeItem("student");
             router.push("/login");
         }
     }, []);
